@@ -6,6 +6,11 @@ const order = new Schema({
     ref: "User",
     required: [true, "User reference is required"]
   },
+  items: [{
+    type: Schema.Types.ObjectId,
+    ref: "OrderItem",
+    required: [true, "Order items are required"]
+  }],
   status: {
     type: String,
     enum: ["pending", "completed", "cancelled"],

@@ -5,71 +5,64 @@ import authorizeAdmin from "../../middlewares/authorization.js"
 
 const router = Router()
 
-// Get all orders (admin only)
-router.get("/", authenticateToken, authorizeAdmin, async (req, res) => {
+// Create a new order
+router.post('/', authenticateToken, async (req, res) => {
   try {
-    const orders = await Order.find().populate("user", "username email").populate("items.product")
-    res.status(200).json(orders)
-  } catch (error) {
-    console.error("Error fetching orders:", error)
-    res.status(500).json({ error: error.message })
-  }
-})
-
-// Get a specific order (user can view their own, admin can view any)
-router.get("/:id", authenticateToken, async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id).populate("items.product")
-    if (!order) return res.status(404).json({ error: "Order not found" })
-
-    if (req.user._id !== order.user.toString() && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden to view this order" })
-    }
-
-    res.status(200).json(order)
-  } catch (error) {
-    console.error("Error fetching order:", error)
-    res.status(500).json({ error: error.message })
-  }
-})
-
-// Create a new order (authenticated users only)
-router.post("/", authenticateToken, async (req, res) => {
-  try {
-    const order = new Order({
-      ...req.body,
-      user: req.user._id,
-      status: "pending",
-    });
+    const { user, items, status, total_amount } = req.body
+    const order = new Order({ user, items, status, total_amount })
     await order.save()
-    res.status(201).json(order);
-  } catch (error) {
-    console.error("Error creating order:", error)
-    res.status(400).json({ error: error.message })
+    res.status(201).json({ message: 'Order created successfully', order })
+  } catch (e) {
+    console.error('Error creating order:', e)
+    res.status(400).json({ error: e.message })
   }
 })
 
-// Update order status (admin only)
-router.put("/:id", authenticateToken, authorizeAdmin, async (req, res) => {
+// Get all orders (admin only)
+router.get('/', authenticateToken, authorizeAdmin, async (req, res) => {
   try {
-    const order = await Order.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true })
-    if (!order) return res.status(404).json({ error: "Order not found" })
-    res.status(200).json(order)
-  } catch (error) {
-    console.error("Error updating order:", error)
-    res.status(500).json({ error: error.message })
+    const orders = await Order.find().populate('user').populate('items')
+    res.status(200).json(orders)
+  } catch (e) {
+    console.error('Error fetching orders:', e)
+    res.status(400).json({ error: e.message })
   }
 })
 
-// Delete an order (admin only)
-router.delete("/:id", authenticateToken, authorizeAdmin, async (req, res) => {
+// Get order by id (authenticated user)
+router.get('/:id', authenticateToken, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate('user').populate('items')
+    if (!order) return res.status(404).json({ error: 'Order not found' })
+    res.status(200).json(order)
+  } catch (e) {
+    console.error('Error fetching order:', e)
+    res.status(500).json({ error: e.message })
+  }
+})
+
+// Update order by id (authenticated user or admin)
+router.put('/:id', authenticateToken, async (req, res) => {
+  try {
+    const { user, items, status, total_amount } = req.body
+    const order = await Order.findByIdAndUpdate(req.params.id, { user, items, status, total_amount }, { new: true })
+    if (!order) return res.status(404).json({ error: 'Order not found' })
+    res.status(200).json(order)
+  } catch (e) {
+    console.error('Error updating order:', e)
+    res.status(400).json({ error: e.message })
+  }
+})
+
+// Delete order by id (admin only)
+router.delete('/:id', authenticateToken, authorizeAdmin, async (req, res) => {
   try {
     const order = await Order.findByIdAndDelete(req.params.id)
-    if (!order) return res.status(404).json({ error: "Order not found" })
-    res.status(200).json({ message: "Order deleted successfully" })
-  } catch (error) {
-    console.error("Error deleting order:", error)
-    res.status(500).json({ error: error.message })
+    if (!order) return res.status(404).json({ error: 'Order not found' })
+    res.status(200).json({ message: 'Order deleted successfully' })
+  } catch (e) {
+    console.error('Error deleting order:', e)
+    res.status(400).json({ error: e.message })
   }
 })
 

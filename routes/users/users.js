@@ -28,6 +28,19 @@ router.get('/:id', authenticateToken, async (req, res) => {
   }
 })
 
+// Add new user (admin only)
+router.post('/', authenticateToken, authorizeAdmin, async (req, res) => {
+  try {
+    const { user_name, first_name, last_name, email, password, role } = req.body
+    const user = new User({ user_name, first_name, last_name, email, password, role })
+    await user.save()
+    res.status(201).json({ message: 'User added successfully', user })
+  } catch (e) {
+    console.error('Error adding user:', e)
+    res.status(400).json({ error: e.message })
+  }
+})
+
 // Update user by id (authenticated user or admin)
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
