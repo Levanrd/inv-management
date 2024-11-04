@@ -7,7 +7,7 @@
       <el-table-column prop="user.user_name" label="User"></el-table-column>
       <el-table-column prop="status" label="Status"></el-table-column>
       <el-table-column prop="total_amount" label="Total Amount"></el-table-column>
-      <el-table-column label="Items">
+      <!-- <el-table-column label="Items">
         <template slot-scope="scope">
           <ul>
             <li v-for="item in scope.row.items" :key="item._id">
@@ -15,7 +15,7 @@
             </li>
           </ul>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column label="Actions">
         <template slot-scope="scope">
           <el-select v-model="scope.row.status" placeholder="Update status" @change="updateOrderStatus(scope.row)">
