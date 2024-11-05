@@ -11,7 +11,7 @@ let routes = [
     redirect: '/login'
   },
   {
-    path: '/',
+    path: '/login',
     name: 'Login',
     component: Login
   },
