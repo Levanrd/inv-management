@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h2>Product Management</h2>
     <el-button type="primary" @click="showProductModal = true">Add Product</el-button>
     
     <el-table :data="products" style="width: 100%" empty-text="No data available">

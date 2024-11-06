@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h2>Category Management</h2>
     <el-button type="primary" @click="showCategoryModal = true">Add Category</el-button>
     
     <el-table :data="categories" style="width: 100%" empty-text="No data available">

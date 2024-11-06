@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h2>User Management</h2>
     <el-button type="primary" @click="showUserModal = true">Add User</el-button>
     
     <el-table :data="users" style="width: 100%">

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h2>Order Management</h2>
     <el-button type="primary" @click="showOrderModal = true">Add Order</el-button>
 
     <el-table :data="orders" style="width: 100%" empty-text="No data available">

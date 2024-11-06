@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <h2>Order Items Management</h2>
-    
+  <div>    
     <el-button type="primary" @click="showAddItemModal = true">Add Item</el-button>
 
     <el-table :data="orderItems" style="width: 100%" empty-text="No items available">

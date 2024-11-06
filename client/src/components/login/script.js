@@ -22,7 +22,6 @@ export default {
         const response = await ApiConnector.post('/auth/login', this.form).then(res => res.data)
         const { token } = response
         localStorage.setItem('token', token)
-        console.log(token)
         this.isAuthenticated = true
         this.$router.push('/ims')
       } catch (e) {

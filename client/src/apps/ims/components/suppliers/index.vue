@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h2>Supplier Management</h2>
     <el-button type="primary" @click="showSupplierModal = true">Add Supplier</el-button>
     
     <el-table :data="suppliers" style="width: 100%" empty-text="No data available">
