@@ -2,27 +2,46 @@
   <div>
     <el-button type="primary" @click="showOrderModal = true">Add Order</el-button>
 
-    <el-table :data="orders" style="width: 100%" empty-text="No data available">
-      <el-table-column prop="user.user_name" label="User"></el-table-column>
-      <el-table-column prop="status" label="Status"></el-table-column>
-      <el-table-column prop="total_amount" label="Total Amount"></el-table-column>
-      <!-- <el-table-column label="Items">
+    <el-table :data="orders" style="width: 100%" empty-text="No orders available">
+      <el-table-column prop="user._id" label="User ID"></el-table-column>
+      <el-table-column prop="_id" label="Order ID"></el-table-column>
+      <el-table-column label="Order Items">
         <template slot-scope="scope">
-          <ul>
-            <li v-for="item in scope.row.items" :key="item._id">
-              {{ item.product_name }} (Quantity: {{ item.quantity }})
-            </li>
-          </ul>
+          <div style="line-height: 1.5;">
+            <span v-for="(item, index) in scope.row.order_items" :key="item._id" style="display: block; margin-bottom: 4px;">
+              <strong>Item {{ index + 1 }}:</strong> Product ID: <span style="color: #409EFF;">{{ item.product }}</span>, 
+              Price: <span style="color: #67C23A;">{{ item.price }}</span>, 
+              Quantity: <span style="color: #E6A23C;">{{ item.quantity }}</span>
+            </span>
+          </div>
         </template>
-      </el-table-column> -->
+      </el-table-column>
+      <el-table-column prop="total_amount" label="Total Amount">
+        <template slot-scope="scope">
+          <span style="font-weight: bold; color: #409EFF;">₱{{ scope.row.total_amount }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="Actions">
         <template slot-scope="scope">
-          <el-select v-model="scope.row.status" placeholder="Update status" @change="updateOrderStatus(scope.row)">
-            <el-option label="Pending" value="pending"></el-option>
-            <el-option label="Completed" value="completed"></el-option>
-            <el-option label="Cancelled" value="cancelled"></el-option>
-          </el-select>
-          <el-button type="danger" @click="confirmDeleteOrder(scope.row)">Delete</el-button>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <el-select 
+              v-model="scope.row.status" 
+              placeholder="Update status" 
+              size="small" 
+              style="min-width: 120px;" 
+              @change="updateOrderStatus(scope.row)">
+              <el-option label="Pending" value="pending"></el-option>
+              <el-option label="Completed" value="completed"></el-option>
+              <el-option label="Cancelled" value="cancelled"></el-option>
+            </el-select>
+            <el-button 
+              type="danger" 
+              size="small" 
+              icon="el-icon-delete" 
+              @click="confirmDeleteOrder(scope.row)">
+              Delete
+            </el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -80,6 +99,7 @@ export default {
       try {
         const response = await ApiConnector.get("/orders");
         this.orders = response.data;
+        console.log(this.orders);
       } catch (e) {
         console.error("Error fetching orders:", e);
         this.$message.error("Failed to load orders");
