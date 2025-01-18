@@ -6,7 +6,7 @@ const order = new Schema({
     ref: "User",
     required: [true, "User reference is required"]
   },
-  items: [{
+  order_items: [{
     type: Schema.Types.ObjectId,
     ref: "OrderItem",
     required: [true, "Order items are required"]

@@ -27,18 +27,18 @@
     </el-header>
 
     <el-tabs v-model="activeTab">
-      <el-tab-pane label="Users" name="users">
+      <!-- <el-tab-pane label="Users" name="users">
         <UserManagement />
-      </el-tab-pane>
+      </el-tab-pane> -->
       <el-tab-pane label="Products" name="products">
         <ProductManagement />
       </el-tab-pane>
-      <el-tab-pane label="Categories" name="categories">
+      <!-- <el-tab-pane label="Categories" name="categories">
         <CategoryManagement />
       </el-tab-pane>
       <el-tab-pane label="Suppliers" name="suppliers">
         <SupplierManagement />
-      </el-tab-pane>
+      </el-tab-pane> -->
       <el-tab-pane label="Orders" name="orders">
         <OrderManagement />
       </el-tab-pane>
@@ -55,10 +55,10 @@ import ApiConnector from '../../api/ApiConnector'
 export default {
   name: 'Ims',
   components: {
-    UserManagement: () => import('./components/users/index.vue'),
+    // UserManagement: () => import('./components/users/index.vue'),
     ProductManagement: () => import('./components/products/index.vue'),
-    CategoryManagement: () => import('./components/categories/index.vue'),
-    SupplierManagement: () => import('./components/suppliers/index.vue'),
+    // CategoryManagement: () => import('./components/categories/index.vue'),
+    // SupplierManagement: () => import('./components/suppliers/index.vue'),
     OrderManagement: () => import('./components/orders/index.vue'),
     // OrderItemsManagement: () => import('./components/order-items/index.vue'),
   },

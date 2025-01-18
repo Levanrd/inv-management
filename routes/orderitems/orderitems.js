@@ -5,7 +5,7 @@ import authorizeAdmin from "../../middlewares/authorization.js"
 
 const router = Router()
 
-// Add item to an order (authenticated users, must own the order or be admin)
+// Add item to an existing order (authenticated users, must own the order or be admin)
 router.post("/:orderId/items", authenticateToken, async (req, res) => {
   try {
     const order = await OrderItem.findById(req.params.orderId)
@@ -24,7 +24,7 @@ router.post("/:orderId/items", authenticateToken, async (req, res) => {
   }
 })
 
-// Update item in an order (authenticated users, must own the order or be admin)
+// Update item in an existing order (authenticated users, must own the order or be admin)
 router.put("/:orderId/items/:itemId", authenticateToken, async (req, res) => {
   try {
     const order = await OrderItem.findById(req.params.orderId)
@@ -47,7 +47,7 @@ router.put("/:orderId/items/:itemId", authenticateToken, async (req, res) => {
   }
 })
 
-// Delete item from an order (authenticated users, must own the order or be admin)
+// Delete item from an existing order (authenticated users, must own the order or be admin)
 router.delete("/:orderId/items/:itemId", authenticateToken, async (req, res) => {
   try {
     const order = await OrderItem.findById(req.params.orderId)

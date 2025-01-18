@@ -19,6 +19,7 @@
               <el-input
                 v-model="form.email"
                 placeholder="Email"
+                @keydown.enter="login"
               ></el-input>
             </el-form-item>
             <el-form-item prop="password">
@@ -26,6 +27,7 @@
                 v-model="form.password"
                 placeholder="Password"
                 show-password
+                @keydown.enter="login"
               ></el-input>
             </el-form-item>
             <el-form-item>
