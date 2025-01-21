@@ -7,7 +7,7 @@
             <el-icon><i class="el-icon-s-shop"></i></el-icon>
             <span class="title">Chelsy Burgers IMS</span>
           </div>
-          <el-form :model="form" class="login-form">
+          <el-form v-model="form" class="login-form">
             <el-form-item v-if="error">
               <el-alert
                 :title="error"
@@ -19,7 +19,6 @@
               <el-input
                 v-model="form.email"
                 placeholder="Email"
-                @keydown.enter="login"
               ></el-input>
             </el-form-item>
             <el-form-item prop="password">
@@ -27,7 +26,6 @@
                 v-model="form.password"
                 placeholder="Password"
                 show-password
-                @keydown.enter="login"
               ></el-input>
             </el-form-item>
             <el-form-item>

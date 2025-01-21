@@ -181,7 +181,7 @@ export default {
       }
     },
   },
-  created() {
+  mounted() {
     this.fetchOrders();
     this.fetchUsers();
   },

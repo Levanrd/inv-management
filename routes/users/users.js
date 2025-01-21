@@ -5,8 +5,8 @@ import authorizeAdmin from "../../middlewares/authorization.js"
 
 const router = Router()
 
-// Get all users (admin only)
-router.get('/', authenticateToken, authorizeAdmin, async (req, res) => {
+// Get all users
+router.get('/', authenticateToken, async (req, res) => {
   try {
     const users = await User.find()
     res.status(200).json(users)
@@ -16,7 +16,7 @@ router.get('/', authenticateToken, authorizeAdmin, async (req, res) => {
   }
 })
 
-// Get user by id (authenticated user)
+// Get user by id
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
@@ -41,7 +41,7 @@ router.post('/', authenticateToken, authorizeAdmin, async (req, res) => {
   }
 })
 
-// Update user by id (authenticated user or admin)
+// Update user by id
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     if (req.user._id !== req.params.id && req.user.role !== "admin") {
@@ -57,8 +57,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
   }
 })
 
-// Delete user by id (admin only)
-router.delete('/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+// Delete user by id
+router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id)
     if (!user) return res.status(404).json({ error: 'User not found' })

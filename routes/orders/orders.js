@@ -38,8 +38,8 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 })
 
-// Get all orders (admin only)
-router.get('/', authenticateToken, authorizeAdmin, async (req, res) => {
+// Get all orders
+router.get('/', authenticateToken, async (req, res) => {
   try {
     const orders = await Order.find().populate('user').populate('order_items')
     res.status(200).json(orders)
@@ -50,7 +50,7 @@ router.get('/', authenticateToken, authorizeAdmin, async (req, res) => {
 })
 
 // Get order by id (admin only)
-router.get('/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id).populate('user').populate('items')
     if (!order) return res.status(404).json({ error: 'Order not found' })

@@ -26,7 +26,7 @@
       </el-dropdown>
     </el-header>
 
-    <el-tabs v-model="activeTab">
+    <el-tabs v-model="activeTab" style="margin: 5px;">
       <!-- <el-tab-pane label="Users" name="users">
         <UserManagement />
       </el-tab-pane> -->
@@ -57,14 +57,14 @@ export default {
   components: {
     // UserManagement: () => import('./components/users/index.vue'),
     ProductManagement: () => import('./components/products/index.vue'),
-    // CategoryManagement: () => import('./components/categories/index.vue'),
-    // SupplierManagement: () => import('./components/suppliers/index.vue'),
     OrderManagement: () => import('./components/orders/index.vue'),
     // OrderItemsManagement: () => import('./components/order-items/index.vue'),
+    // CategoryManagement: () => import('./components/categories/index.vue'),
+    // SupplierManagement: () => import('./components/suppliers/index.vue'),
   },
   data() {
     return {
-      activeTab: 'users'
+      activeTab: 'products'
     }
   },
   methods: {
@@ -77,9 +77,6 @@ export default {
       this.$router.push('/account-settings')
     },
     logout() {
-      // localStorage.removeItem('token')
-      // console.log('User logged out')
-      // this.$router.push('/login')
       try {
         ApiConnector.post('/auth/logout')
         localStorage.removeItem('token')
@@ -91,10 +88,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-/* Styling for the toolbar, adjust as needed */
-.el-header {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-}
-</style>

@@ -8,7 +8,10 @@ const router = Router()
 // Get all products (authenticated user)
 router.get("/", authenticateToken, async (req, res) => {
   try {
-    const products = await Product.find().populate("category supplier")
+    const products = await Product.find()
+      .sort({ _id: -1 })
+      .populate("category supplier")
+      
     res.status(200).json(products)
   } catch (e) {
     console.error("Error fetching products:", e)
