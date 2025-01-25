@@ -51,6 +51,4 @@ const store = new Vuex.Store({
   }
 })
 
-console.log('store',store)
-
 export default store
