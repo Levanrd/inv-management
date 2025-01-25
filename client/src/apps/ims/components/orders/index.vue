@@ -99,7 +99,6 @@ export default {
       try {
         const response = await ApiConnector.get("/orders");
         this.orders = response.data;
-        console.log(this.orders);
       } catch (e) {
         console.error("Error fetching orders:", e);
         this.$message.error("Failed to load orders");

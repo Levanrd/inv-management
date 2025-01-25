@@ -2,6 +2,7 @@ import Vue from "vue"
 import Router from "vue-router"
 import Login from "../components/login"
 import Ims from "../apps/ims/app.vue"
+import store from "../store"
 
 Vue.use(Router)
 
@@ -29,20 +30,30 @@ const router = new Router({
   routes
 })
 
+const isTokenValid = (token) => {
+  try {
+    const { exp } = JSON.parse(atob(token.split('.')[1]))
+    return exp && Date.now() / 1000 < exp
+  } catch (e) {
+    console.error('Invalid token format', e)
+    return false
+  }
+}
+
 // Navigation guard to check for token
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    // If the route requires authentication and no token is found, redirect to login
-    if (!token) {
-      next({ name: 'Login' })
+  const token = store.getters.getToken
+
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    // Check for token and validity
+    if (!token || !isTokenValid(token)) {
+      next({ name: "Login" })
     } else {
       next()
     }
-  } else if (to.path === '/login' && token) {
-    // If the user is trying to access the login page and is already authenticated, redirect to /ims
-    next({ name: 'Ims' })
-    } else {
+  } else if (to.name === "Login" && token && isTokenValid(token)) {
+    next({ name: "Ims" })
+  } else {
     next()
   }
 })

@@ -33,7 +33,7 @@
           <el-option :value="50" label="50"></el-option>
           <el-option :value="100" label="100"></el-option>
         </el-select>
-        <el-button type="success" icon="el-icon-refresh" size="medium" title="Refresh" @click="fetchProducts" :loading="loading"> </el-button>
+        <el-button type="success" icon="el-icon-refresh" size="medium" title="Refresh" @click="init" :loading="loading"> </el-button>
         <el-button type="primary" size="medium" @click="showProductModal = true"> Add Product</el-button>
       </div>
       <div>
@@ -171,7 +171,7 @@ export default {
   },
   methods: {
     // Fetch products from the API
-    async fetchProducts() {
+    async init() {
       try {
         this.loading = true
         this.keyword = ""
@@ -199,7 +199,7 @@ export default {
         this.$message.error("Failed to load categories or suppliers")
       }
     },
-    // Save a new product to the API
+    // Save a new product
     async saveProduct() {
       if (!this.productForm.product_name || !this.productForm.price || !this.productForm.stock_qty || !this.productForm.category || !this.productForm.supplier) {
         this.$message.error("Please fill out all required fields")
@@ -210,7 +210,7 @@ export default {
         await ApiConnector.post("/products", payload)
         this.showProductModal = false
         this.resetProductForm()
-        this.fetchProducts() // Refresh product list
+        this.init() // Refresh product list
         this.$message.success("Product added successfully")
       } catch (e) {
         if (e.response && e.response.data && e.response.data.error) {
@@ -239,7 +239,7 @@ export default {
     async deleteProduct(productId) {
       try {
         await ApiConnector.delete(`/products/${productId}`)
-        this.fetchProducts() // Refresh product list
+        this.init() // Refresh product list
         this.$message.success("Product deleted successfully")
       } catch (e) {
         console.error("Error deleting product:", e)
@@ -280,7 +280,7 @@ export default {
   },
 
   mounted() {
-    this.fetchProducts()
+    this.init()
     this.fetchCategoriesAndSuppliers()
   },
 }

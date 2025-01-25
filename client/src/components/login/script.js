@@ -19,23 +19,17 @@ export default {
   methods: {
     async login() {
       try {
-        const response = await ApiConnector.post('/auth/login', this.form).then(res => res.data)
-        const { token } = response
-        localStorage.setItem('token', token)
-        this.isAuthenticated = true
+        const response = await ApiConnector.post('/auth/login', this.form)
+        const { token, user_name, role } = response.data
+
+        this.$store.dispatch('login', { token, user_name, role })
+
         this.$router.push('/ims')
       } catch (e) {
         if (e) {
           this.error = e.response.data.error
         }
       }
-    }
-  },
-  created() {
-    const token = localStorage.getItem('token')
-    if (token) {
-      this.isAuthenticated = true
-      this.$router.push('/ims')
     }
   }
 }

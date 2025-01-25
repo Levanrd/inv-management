@@ -28,13 +28,18 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body
     const user = await User.findOne({ email }) 
+
     if (!user) return res.status(400).json({ error: 'Incorrect email or password' })
 
     const isMatch = await user.comparePassword(password)
     if (!isMatch) return res.status(400).json({ error: 'Incorrect email or password' })
 
     const token = generateToken({ _id: user._id, role: user.role })
-    res.status(200).json({ token })
+    res.status(200).json({ 
+      token,
+      user_name: user.user_name,
+      role: user.role
+    })
   } catch (e) {
     console.error('Error logging in user:', e)
     res.status(400).json({ error: e.errors })
