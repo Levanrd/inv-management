@@ -85,7 +85,7 @@ router.post("/bulk-upload", authenticateToken, authorizeAdmin, async (req, res) 
     }
 
     res.status(201).json({
-      message: `${newProducts.length} products successfully added`,
+      message: `${newProducts.length} products added`,
       invalidProducts: invalidProducts.length,
       invalidProducts
     })

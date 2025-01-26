@@ -37,8 +37,26 @@
         <el-button type="primary" size="medium" @click="showProductModal = true"> Add Product</el-button>
       </div>
       <div>
-        <el-button type="primary" size="medium">Upload <i class="el-icon-upload el-icon-right"></i></el-button>
-        <el-button type="primary" size="medium">Download <i class="el-icon-download el-icon-right"></i></el-button>
+        <input
+          type="file"
+          ref="fileInput"
+          style="display: none;"
+          @change="handleProductsFileUpload"
+        />
+        <el-button 
+          type="primary" 
+          size="medium" 
+          @click="triggerFileInput" 
+          :loading="loading" 
+          :disabled="loading"
+        >Upload <i class="el-icon-upload el-icon-right"></i></el-button>
+        <el-button 
+          type="primary" 
+          size="medium" 
+          @click="downloadProducts" 
+          :loading="loading"
+          :disabled="loading"
+        >Download <i class="el-icon-download el-icon-right"></i></el-button>
       </div>
     </div>
     
@@ -47,6 +65,7 @@
       :data="paginatedData" 
       style="width: 100%"
       v-loading="loading"
+      :disabled="loading"
       empty-text="No data available"
     >
       <el-table-column prop="product_name" label="Product Name"></el-table-column>
@@ -128,6 +147,8 @@
 
 <script>
 import ApiConnector from '../../../../api/ApiConnector'
+import * as XLSX from 'xlsx'
+import { saveAs } from 'file-saver'
 
 export default {
   data() {
@@ -277,6 +298,97 @@ export default {
       
       this.currentPage = 1
     },
+
+    downloadProducts() {
+      this.loading = true
+      if(!this.allProducts.length) {
+        this.$message.warning("No products available to download")
+        this.loading = false
+        return
+      }
+
+      try {
+        // Transform data in excel format
+        let data = this.allProducts.map((product) => ({
+          Product: product.product_name,
+          Description: product.description,
+          Price: product.price,
+          StockQty: product.stock_qty,
+          Category: product.category.category_name,
+          Supplier: product.supplier.supplier_name
+        }))
+
+        // Create new workbook and worksheet
+        let worksheet = XLSX.utils.json_to_sheet(data)
+        let workbook = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Products")
+
+        // Workbook to binary to create blob file
+        let excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
+        let blob = new Blob([excelBuffer], { type: "application/octet-stream" })
+
+        // File save to download the file
+        saveAs(blob, "Products.xlsx")
+
+        this.$message.success("Downloaded Successfully")
+        this.loading = false
+      } catch (e) {
+        console.error("Error downloading products: ", error)
+        this.$message.error("Failed to download products")
+        this.loading = false
+      }
+    },
+
+    triggerFileInput() {
+      this.$refs.fileInput.click()
+      this.loading = true
+    },
+
+    async handleProductsFileUpload(event) {
+      try {
+        this.loading = true
+
+        let file = event.target.files[0]
+        if(!file) {
+          this.$message.warning("No file selected")
+          this.loading = false
+          return
+        }
+
+        let reader = new FileReader()
+
+        reader.onload = async (e) => {
+          let data = new Uint8Array(e.target.result)
+          let workbook = XLSX.read(data, { type: "array"} )
+
+          let firstSheetName = workbook.SheetNames[0]
+          let worksheet = workbook.Sheets[firstSheetName]
+          let products = XLSX.utils.sheet_to_json(worksheet)
+
+          await this.productsUpload(products)
+        }
+
+        reader.readAsArrayBuffer(file)
+      } catch (e) {
+        console.error("Error uploading file: ", e)
+        this.$message.error("Failed to upload file")
+      } finally {
+        this.loading = false
+        this.$refs.fileInput.value = null
+      }
+    },
+
+    async productsUpload(products) {
+      try {
+        let response = await ApiConnector.post("/products/bulk-upload", products)
+        this.$message.success(response.data.message)
+        this.loading = false
+        this.init()
+      } catch (e) {
+        console.error("Error uploading products: ", e)
+        this.$message.error("Failed to upload products")
+      }
+    }
   },
 
   mounted() {
