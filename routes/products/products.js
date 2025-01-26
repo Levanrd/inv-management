@@ -43,6 +43,58 @@ router.post("/", authenticateToken, authorizeAdmin, async (req, res) => {
   }
 })
 
+// Bulk upload products (admin only)
+router.post("/bulk-upload", authenticateToken, authorizeAdmin, async (req, res) => {
+  try {
+    const products = req.body
+    if(!Array.isArray(products) || !products.length) {
+      console.log(products)
+      return res.status(400).json({ error: "No valid products provided" })
+    }
+
+    let newProducts = []
+    let invalidProducts = []
+
+    for (let product of products) {
+      // Validate required fields
+      if (
+        !product.product_name ||
+        product.price == null ||
+        product.stock_qty == null ||
+        !product.category ||
+        !product.supplier
+      ) {
+        invalidProducts.push(product)
+        continue
+      }
+
+      let newProduct = new Product({
+        product_name: product.product_name,
+        description: product.description || "",
+        price: product.price,
+        stock_qty: product.stock_qty,
+        category: product.category,
+        supplier: product.supplier,
+      })
+
+      newProducts.push(newProduct)
+    }
+
+    if (newProducts.length) {
+      await Product.insertMany(newProducts)
+    }
+
+    res.status(201).json({
+      message: `${newProducts.length} products successfully added`,
+      invalidProducts: invalidProducts.length,
+      invalidProducts
+    })
+  } catch (e) {
+    console.error("Error bulk uploading products: ", e)
+    res.status(500).json({ error: e.message})
+  }
+})
+
 // Update product by id (admin only)
 router.put("/:id", authenticateToken, authorizeAdmin, async (req, res) => {
   try {
