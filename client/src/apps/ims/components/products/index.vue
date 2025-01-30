@@ -49,14 +49,14 @@
           @click="triggerFileInput" 
           :loading="loading" 
           :disabled="loading"
-        >Upload <i class="el-icon-upload el-icon-right"></i></el-button>
+        >Upload <i class="el-icon-upload"></i></el-button>
         <el-button 
           type="primary" 
           size="medium" 
           @click="downloadProducts" 
           :loading="loading"
           :disabled="loading"
-        >Download <i class="el-icon-download el-icon-right"></i></el-button>
+        >Download <i class="el-icon-download"></i></el-button>
       </div>
     </div>
     
@@ -92,10 +92,21 @@
       </el-table-column>
       <el-table-column label="Actions">
         <template slot-scope="scope">
-          <!-- <el-button type="danger" @click="confirmDeleteProduct(scope.row)">Delete</el-button> -->
-          <el-button type="primary" icon="el-icon-edit" size="medium"></el-button>
-          <el-button type="primary" icon="el-icon-share" size="medium"></el-button>
-          <el-button type="primary" icon="el-icon-delete" size="medium" @click="confirmDeleteProduct(scope.row)"></el-button>
+          <el-button 
+            type="primary" 
+            icon="el-icon-edit" 
+            size="medium" 
+            @click="editProduct(scope.row)" 
+            title="Edit">
+          </el-button>
+          <el-button 
+            type="primary" 
+            icon="el-icon-share" 
+            size="medium" 
+            title="Share"
+            @click="shareProduct(scope.row)">
+          </el-button>
+          <el-button type="primary" icon="el-icon-delete" size="medium" @click="confirmDeleteProduct(scope.row)" title="Delete"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -142,6 +153,50 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+
+    <!-- Edit Product Modal -->
+    <el-dialog :visible.sync="editProductModal" @close="cancelEditProduct" title="Edit Product" width="50%">
+      <el-form :model="productForm" label-width="120px">
+        <el-form-item label="Product Name*">
+          <el-input v-model="productForm.product_name" placeholder="Enter product name"></el-input>
+        </el-form-item>
+        <el-form-item label="Description">
+          <el-input type="textarea" v-model="productForm.description" placeholder="Enter description"></el-input>
+        </el-form-item>
+        <el-form-item label="Price*">
+          <el-input v-model="productForm.price" placeholder="Enter price" type="number"></el-input>
+        </el-form-item>
+        <el-form-item label="Stock Quantity*">
+          <el-input v-model="productForm.stock_qty" placeholder="Enter stock quantity" type="number"></el-input>
+        </el-form-item>
+        <el-form-item label="Category*">
+          <el-select v-model="productForm.category" placeholder="Select category">
+            <el-option v-for="category in categories" :key="category._id" :label="category.category_name" :value="category._id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Supplier*">
+          <el-select v-model="productForm.supplier" placeholder="Select supplier">
+            <el-option v-for="supplier in suppliers" :key="supplier._id" :label="supplier.supplier_name" :value="supplier._id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="saveEditedProduct">Save</el-button>
+          <el-button @click="editProductModal = false">Cancel</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
+    <!-- Share Link Modal -->
+    <el-dialog :visible.sync="shareProductModal" title="Share with People on your team" width="40%">
+      <el-input v-model="shareableLink" readonly></el-input>
+      <el-button 
+        style="margin: 5px 0;" 
+        round
+        size="mini"
+        type="info"
+        @click="copyShareableLink">Copy Link <i class="el-icon-link">
+      </i></el-button>
+    </el-dialog>
   </div>
 </template>
 
@@ -158,6 +213,8 @@ export default {
       categories: [],
       suppliers: [],
       showProductModal: false,
+      editProductModal: false,
+      shareProductModal: false,
       productForm: {
         product_name: "",
         description: "",
@@ -171,7 +228,8 @@ export default {
       dateFilter: "",
       currentPage: 1,
       rowsPerPage: 5,
-      loading: false
+      loading: false,
+      shareableLink: ''
     };
   },
   computed: {
@@ -340,14 +398,24 @@ export default {
     },
 
     triggerFileInput() {
-      this.$refs.fileInput.click()
       this.loading = true
+      this.$refs.fileInput.click()
+
+      setTimeout(() => {
+        if (!this.$refs.fileInput.files.length) {
+          this.loading = false
+        }
+      }, 500)
     },
 
     async handleProductsFileUpload(event) {
-      try {
-        this.loading = true
+      if (!event.target.files || !event.target.files.length) {
+        this.$message.warning("No file selected")
+        this.loading = false
+        return
+      }
 
+      try {
         let file = event.target.files[0]
         if(!file) {
           this.$message.warning("No file selected")
@@ -379,6 +447,7 @@ export default {
     },
 
     async productsUpload(products) {
+      this.loading = true
       try {
         let response = await ApiConnector.post("/products/bulk-upload", products)
         this.$message.success(response.data.message)
@@ -388,6 +457,53 @@ export default {
         console.error("Error uploading products: ", e)
         this.$message.error("Failed to upload products")
       }
+    },
+
+    async editProduct(product)  {
+      this.productForm  =  { ...product }
+      this.editProductModal = true
+    },
+
+    async saveEditedProduct() {
+      try {
+        this.loading = true
+        let prodId = this.productForm._id
+
+        await ApiConnector.put(`/products/${prodId}`, this.productForm)
+        this.$message.success("Product updated successfully")
+        this.editProductModal = false
+        this.init()
+      } catch (e) {
+        console.error("Error updating product: ", e)
+        this.$message.error("Failed to update product")
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async cancelEditProduct() {
+      this.productForm = {
+        product_name: "",
+        description: "",
+        price: 0,
+        stock_qty: 0,
+        category: "",
+        supplier: "",
+      };
+      this.editProductModal = false;
+    },
+
+    async shareProduct(product) {
+      this.shareableLink = `${window.location.origin}/products/id=${product._id}`
+      this.shareProductModal = true
+    },
+
+    copyShareableLink() {
+      navigator.clipboard.writeText(this.shareableLink).then(() => {
+        this.$message.success("Link copied to clipboard")
+      }).catch(() => {
+        this.$message.error("Failed to copy link")
+      })
     }
   },
 
