@@ -93,6 +93,7 @@
       <el-table-column label="Actions">
         <template slot-scope="scope">
           <el-button 
+            v-if="role === 'admin'"
             type="primary" 
             icon="el-icon-edit" 
             size="medium" 
@@ -106,7 +107,14 @@
             title="Share"
             @click="shareProduct(scope.row)">
           </el-button>
-          <el-button type="primary" icon="el-icon-delete" size="medium" @click="confirmDeleteProduct(scope.row)" title="Delete"></el-button>
+          <el-button 
+            v-if="role === 'admin'"
+            type="primary" 
+            icon="el-icon-delete" 
+            size="medium" 
+            @click="confirmDeleteProduct(scope.row)" 
+            title="Delete">
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -204,6 +212,7 @@
 import ApiConnector from '../../../../api/ApiConnector'
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
+import { mapGetters } from 'vuex';
 
 export default {
   data() {
@@ -233,6 +242,10 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(["getRole"]),
+    role() {
+      return this.getRole
+    },
     paginatedData() {
       const start = (this.currentPage - 1) * this.rowsPerPage
       const end = start + this.rowsPerPage
@@ -530,5 +543,4 @@ export default {
   padding:12px;
   margin-bottom:12px; 
 }
-
 </style>
