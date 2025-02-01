@@ -1,6 +1,7 @@
 import Vue from "vue"
 import Router from "vue-router"
 import Login from "../components/login"
+import ProductDetails from "../apps/ims/components/product-details"
 import Ims from "../apps/ims/app.vue"
 import store from "../store"
 
@@ -21,6 +22,12 @@ let routes = [
     name: 'Ims',
     component: Ims,
     meta: { requiresAuth: true } 
+  },
+  {
+    path: '/ims/products/:id',
+    name: 'ProductDetails',
+    component: ProductDetails,
+    meta: { requiresAuth: true }
   }
 ]
 // .concat(Ims.routes)

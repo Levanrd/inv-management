@@ -90,8 +90,15 @@
           {{ scope.row.supplier.supplier_name }}
         </template>
       </el-table-column>
-      <el-table-column label="Actions">
+      <el-table-column label="Actions" width="300">
         <template slot-scope="scope">
+          <el-button
+            type="info" 
+            icon="el-icon-view" 
+            size="medium" 
+            @click="viewProduct(scope.row._id)" 
+            title="View">
+          </el-button>
           <el-button 
             v-if="role === 'admin'"
             type="primary" 
@@ -101,7 +108,7 @@
             title="Edit">
           </el-button>
           <el-button 
-            type="primary" 
+            type="warning" 
             icon="el-icon-share" 
             size="medium" 
             title="Share"
@@ -109,7 +116,7 @@
           </el-button>
           <el-button 
             v-if="role === 'admin'"
-            type="primary" 
+            type="danger" 
             icon="el-icon-delete" 
             size="medium" 
             @click="confirmDeleteProduct(scope.row)" 
@@ -370,6 +377,10 @@ export default {
       this.currentPage = 1
     },
 
+    viewProduct(id) {
+      this.$router.push(`/ims/products/${id}`)
+    },
+
     downloadProducts() {
       this.loading = true
       if(!this.allProducts.length) {
@@ -507,7 +518,7 @@ export default {
     },
 
     async shareProduct(product) {
-      this.shareableLink = `${window.location.origin}/products/id=${product._id}`
+      this.shareableLink = `${window.location.origin}/ims/products/${product._id}`
       this.shareProductModal = true
     },
 
