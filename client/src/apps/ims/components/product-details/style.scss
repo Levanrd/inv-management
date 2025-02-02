@@ -1,0 +1,75 @@
+/* Back Button Style */
+.back-button-container {
+  width: 77%;
+  margin: 20px auto 0;
+  text-align: left;
+}
+
+.product-container {
+  width: 80%;
+  margin: auto;
+  padding: 20px;
+  background: #fff;
+}
+
+.product-details {
+  display: flex;
+  gap: 20px;
+}
+
+.product-images {
+  flex: 1;
+}
+
+.main-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.thumbnails {
+  display: flex;
+  margin-top: 10px;
+}
+
+.thumbnail {
+  width: 60px;
+  height: 60px;
+  margin-right: 5px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.3s;
+}
+
+.thumbnail:hover {
+  transform: scale(1.1);
+}
+
+.product-info {
+  flex: 1;
+}
+
+.product-title {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.product-price {
+  font-size: 24px;
+  color: #67C23A;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.product-description {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.product-meta p {
+  margin: 5px 0;
+}
+
+.share-product {
+  margin-top: 10px;
+}

@@ -1,0 +1,15 @@
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  /* /* margin-bottom:12px;  */
+  padding:12px;
+  background-color: #f7f7f7;
+  gap: 12px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding:12px;
+  margin-bottom:12px; 
+}

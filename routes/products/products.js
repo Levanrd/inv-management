@@ -9,7 +9,7 @@ const router = Router()
 router.get("/", authenticateToken, async (req, res) => {
   try {
     const products = await Product.find()
-      .sort({ _id: -1 })
+      // .sort({ _id: -1 })
       .populate("category supplier")
       
     res.status(200).json(products)
