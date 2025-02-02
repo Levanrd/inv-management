@@ -186,13 +186,25 @@
         </el-form-item>
         <el-form-item label="Category*">
           <el-select v-model="productForm.category" placeholder="Select category">
-            <el-option v-for="category in categories" :key="category._id" :label="category.category_name" :value="category._id"></el-option>
+            <el-option 
+              v-for="category in categories" 
+              :key="category._id" 
+              :label="category.category_name" 
+              :value="category._id">
+            </el-option>
           </el-select>
+          <p>{{ productForm.category.category_name }}</p>
         </el-form-item>
         <el-form-item label="Supplier*">
           <el-select v-model="productForm.supplier" placeholder="Select supplier">
-            <el-option v-for="supplier in suppliers" :key="supplier._id" :label="supplier.supplier_name" :value="supplier._id"></el-option>
+            <el-option 
+              v-for="supplier in suppliers" 
+              :key="supplier._id" 
+              :label="supplier.supplier_name" 
+              :value="supplier._id">
+            </el-option>
           </el-select>
+          <p>{{ productForm.supplier.supplier_name }}</p>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="saveEditedProduct">Save</el-button>
@@ -392,12 +404,12 @@ export default {
       try {
         // Transform data in excel format
         let data = this.allProducts.map((product) => ({
-          Product: product.product_name,
-          Description: product.description,
-          Price: product.price,
-          StockQty: product.stock_qty,
-          Category: product.category.category_name,
-          Supplier: product.supplier.supplier_name
+          product_name: product.product_name,
+          description: product.description,
+          price: product.price,
+          stock_qty: product.stock_qty,
+          category: product.category.category_name || 'N/A',
+          supplier: product.supplier.supplier_name || 'N/A'
         }))
 
         // Create new workbook and worksheet
@@ -457,7 +469,33 @@ export default {
           let worksheet = workbook.Sheets[firstSheetName]
           let products = XLSX.utils.sheet_to_json(worksheet)
 
-          await this.productsUpload(products)
+          if (products) {
+            let transformedProd = products.map(product => {
+              let category = this.categories.find(cat => cat.category_name === product.category)
+              let categoryId = category ? category._id : null
+
+              let supplier = this.suppliers.find(supp => supp.supplier_name === product.supplier)
+              let supplierId = supplier ? supplier._id : null
+
+              if (!categoryId || !supplierId) {
+                this.$message({
+                  message: `Invalid Category or Supplier for product: ${product.product_name}`,
+                  type: 'warning',
+                  duration: 5000
+                })
+                return null
+              }
+
+              return {
+                ...product,
+                category: categoryId,
+                supplier: supplierId
+              }
+            }).filter(product => product !== null)
+
+            await this.productsUpload(transformedProd)
+          }
+
         }
 
         reader.readAsArrayBuffer(file)
@@ -484,7 +522,10 @@ export default {
     },
 
     async editProduct(product)  {
-      this.productForm  =  { ...product }
+      this.productForm  =  { ...product,
+        category: product.category._id || product.category,
+        supplier: product.supplier._id || product.supplier
+      }
       this.editProductModal = true
     },
 
@@ -493,7 +534,13 @@ export default {
         this.loading = true
         let prodId = this.productForm._id
 
-        await ApiConnector.put(`/products/${prodId}`, this.productForm)
+        let payload = {
+          ...this.productForm,
+          category: this.productForm.category,
+          supplier: this.productForm.supplier
+        }
+
+        await ApiConnector.put(`/products/${prodId}`, payload)
         this.$message.success("Product updated successfully")
         this.editProductModal = false
         this.init()
