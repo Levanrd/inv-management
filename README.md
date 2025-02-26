@@ -11,18 +11,15 @@ This project consists of a backend and a frontend (client) application. The back
 ## Getting Started
 
 ### Backend Setup
-
-1. **Clone the repository**:
   ```sh
+1. **Clone the repository**:
   git clone https://github.com/lesterivan/inv-management.git
   cd inv-management
 
 2. **Install dependencies**:
-  ```sh
   npm install
 
 3. **Create a .env file in the root directory**:
-  ```sh
   touch .env
 
   // Add the following environment variables to the .env file:
@@ -31,19 +28,17 @@ This project consists of a backend and a frontend (client) application. The back
   JWT_SECRET=your_jwt_secret # (ask your supervisor)
 
 4. **Run the backend server**:
-  ```sh
-  npm run dev
+npm run dev
+```
 
-
-Frontend (Client) Setup
+### Frontend (Client) Setup
+```sh
 1. **Navigate to the client directory**:
-  ```sh
   cd ../client
 
 2. **Install dependencies**:
-  ```sh
   npm install
 
 3. **Run the frontend development server**:
-  ```sh
   npm run dev
+```
