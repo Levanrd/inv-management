@@ -9,7 +9,7 @@ const router = Router()
 router.get("/", authenticateToken, async (req, res) => {
   try {
     const products = await Product.find()
-      // .sort({ _id: -1 })
+      .sort({ _id: -1 })
       .populate("category supplier")
       
     res.status(200).json(products)
@@ -31,7 +31,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
   }
 })
 
-// Create new product (admin only)
+// Create new product (authenticated user)
 router.post("/", authenticateToken, async (req, res) => {
   try {
     const product = new Product(req.body)
@@ -43,7 +43,7 @@ router.post("/", authenticateToken, async (req, res) => {
   }
 })
 
-// Bulk upload products (admin only)
+// Bulk upload products (authenticated user)
 router.post("/bulk-upload", authenticateToken, async (req, res) => {
   try {
     const products = req.body

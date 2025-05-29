@@ -3,7 +3,7 @@
   <el-header style="background-color: #3c8dbc; display: flex; justify-content: space-between; align-items: center; color: #fff; padding: 0 20px;">
       <!-- Left Side: Logo and System Name -->
       <div style="display: flex; align-items: center;">
-        <img src="../../../../public/imgs/chelsylogo.jpg" alt="Company Logo" style="height: 40px; margin-right: 10px;" />
+        <!-- <img src="" alt="Company Logo" style="height: 40px; margin-right: 10px;" /> -->
         <h2 style="margin: 0;">Inventory Management System</h2>
       </div>
 

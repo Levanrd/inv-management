@@ -112,7 +112,7 @@
     
     <!-- Product Table -->
     <el-table 
-      :data="paginatedData" 
+      :data="tableData" 
       style="width: 100%"
       v-loading="loading"
       :disabled="loading"

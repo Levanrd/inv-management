@@ -41,7 +41,11 @@ router.post('/', authenticateToken, async (req, res) => {
 // Get all orders
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const orders = await Order.find().populate('user').populate('order_items')
+    const orders = await Order
+      .find()
+      .sort({ _id: -1 })
+      .populate('user')
+      .populate('order_items')
     res.status(200).json(orders)
   } catch (e) {
     console.error('Error fetching orders:', e)
@@ -52,7 +56,9 @@ router.get('/', authenticateToken, async (req, res) => {
 // Get order by id (admin only)
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id).populate('user').populate('items')
+    const order = await Order.findById(req.params.id)
+      .populate('user')
+      .populate('order_items')
     if (!order) return res.status(404).json({ error: 'Order not found' })
     res.status(200).json(order)
   } catch (e) {

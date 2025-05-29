@@ -37,7 +37,7 @@ export default {
     role() {
       return this.getRole
     },
-    paginatedData() {
+    tableData() {
       const start = (this.currentPage - 1) * this.rowsPerPage
       const end = start + this.rowsPerPage
       return this.searchProduct.slice(start, end)
@@ -56,72 +56,72 @@ export default {
     // Fetch products from the API
     async init() {
       try {
-        this.loading = true;
+        this.loading = true
         const [productsRes, categoriesRes, suppliersRes] = await Promise.all([
           ApiConnector.get("/products"),
           ApiConnector.get("/categories"),
           ApiConnector.get("/suppliers")
-        ]);
+        ])
     
-        this.allProducts = productsRes.data;
-        this.categories = categoriesRes.data;
-        this.suppliers = suppliersRes.data;
+        this.allProducts = productsRes.data
+        this.categories = categoriesRes.data
+        this.suppliers = suppliersRes.data
     
         // By default, select all categories and suppliers
-        this.filteredCategories = this.categories.map(cat => cat._id);
-        this.filteredSuppliers = this.suppliers.map(supp => supp._id);
+        this.filteredCategories = this.categories.map(cat => cat._id)
+        this.filteredSuppliers = this.suppliers.map(supp => supp._id)
     
         // Apply filters to initialize the view
-        this.applyFilters();
+        this.applyFilters()
     
-        this.loading = false;
+        this.loading = false
       } catch (error) {
-        console.error("Error fetching data:", error);
-        this.$message.error("Failed to load data");
-        this.loading = false;
+        console.error("Error fetching data:", error)
+        this.$message.error("Failed to load data")
+        this.loading = false
       }
     },
 
     applyFilters() {
-      let filteredProducts = [...this.allProducts];
+      let filteredProducts = [...this.allProducts]
 
       // Filter by selected categories
       if (this.filteredCategories.length > 0) {
         filteredProducts = filteredProducts.filter(product =>
           this.filteredCategories.includes(product.category._id)
-        );
+        )
       } else {
-        filteredProducts = []; // No categories selected, show no products
+        filteredProducts = [] // No categories selected, show no products
       }
 
       // Filter by selected suppliers
       if (this.filteredSuppliers.length > 0) {
         filteredProducts = filteredProducts.filter(product =>
           this.filteredSuppliers.includes(product.supplier._id)
-        );
+        )
       } else {
-        filteredProducts = []; // No suppliers selected, show no products
+        filteredProducts = [] // No suppliers selected, show no products
       }
 
       // Filter by date range
       if (this.dateFilter && this.dateFilter.length === 2) {
-        const [startDate, endDate] = this.dateFilter.map(date => new Date(date));
+        const [startDate, endDate] = this.dateFilter.map(date => new Date(date))
         filteredProducts = filteredProducts.filter(product => {
-          const productDate = new Date(product.createdAt);
-          return productDate >= startDate && productDate <= endDate;
-        });
+          const productDate = new Date(product.createdAt)
+          return productDate >= startDate && productDate <= endDate
+        })
       }
 
-      // Filter by keyword
+      // Filter by keyword search
       if (this.keyword) {
-        const keywordLower = this.keyword.toLowerCase();
+        const keywordLower = this.keyword.toLowerCase()
         filteredProducts = filteredProducts.filter(product =>
           product.product_name.toLowerCase().includes(keywordLower)
-        );
+        )
       }
 
-      this.searchProduct = filteredProducts;
-      this.currentPage = 1; // Reset to the first page after filtering
+      this.searchProduct = filteredProducts
+      this.currentPage = 1 // Reset to the first page after filtering
     },
 
     // Fetch categories and suppliers for dropdowns
@@ -196,26 +196,6 @@ export default {
         supplier: "",
       }
     },
-    // Filter products by keyword and date picked
-    search() {
-      const keyword = this.keyword.toLowerCase()
-
-      // Filter products by keyword
-      this.searchProduct = this.allProducts.filter((product) => {
-        return product.product_name.toLowerCase().includes(keyword)
-      })
-
-      // Filter products by date range if dateFilter is selected
-      if (this.dateFilter) {
-        const [startDate, endDate] = this.dateFilter.map(date => new Date(date)) // Convert to Date objects
-        this.searchProduct = this.searchProduct.filter(product => {
-          const productDate = new Date(product.createdAt)
-          return productDate >= startDate && productDate <= endDate
-        })
-      }
-      
-      this.currentPage = 1
-    },
 
     viewProduct(id) {
       this.$router.push(`/ims/products/${id}`)
@@ -262,7 +242,6 @@ export default {
     },
 
     triggerFileInput() {
-      this.loading = true
       this.$refs.fileInput.click()
 
       setTimeout(() => {
@@ -273,6 +252,7 @@ export default {
     },
 
     async handleProductsFileUpload(event) {
+      this.loading = true
       if (!event.target.files || !event.target.files.length) {
         this.$message.warning("No file selected")
         this.loading = false

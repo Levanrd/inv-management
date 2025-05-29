@@ -15,9 +15,17 @@ app.use(express.json())
 const start = async () => {
   try {
     // Connect to MongoDB
-    const mongoURI = process.env.MONGO_URI
-    await mongoose.connect(mongoURI)
-    console.log('Connected to the database...')
+    const mongoURI = process.env.MONGO_DB
+    let mongoConnect = await mongoose.connect(mongoURI)
+
+    try {
+      if (mongoConnect) {
+        console.log('Connected to the database...')
+      }
+    } catch (e) {
+      console.error(e)
+    }
+    
 
     // Routes
     app.use('/api', routes)
