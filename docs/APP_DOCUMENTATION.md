@@ -46,6 +46,7 @@ The application supports:
 - [`middlewares`](/C:/Users/Lester/Documents/Repositories/inv-management/middlewares): auth and error middleware
 - [`utils`](/C:/Users/Lester/Documents/Repositories/inv-management/utils): shared helpers for validation, errors, async handlers, serialization, and inventory logic
 - [`scripts/resetDatabase.js`](/C:/Users/Lester/Documents/Repositories/inv-management/scripts/resetDatabase.js): database reset and seed script
+- [`scripts/seedSampleData.js`](/C:/Users/Lester/Documents/Repositories/inv-management/scripts/seedSampleData.js): sample operational data seeder
 
 ### Frontend
 
@@ -283,6 +284,28 @@ Important:
 
 - This command drops the entire current database referenced by `MONGO_URI`
 - Only run it against local/dev databases unless data loss is intended
+
+## Sample Inventory Data
+
+To populate inventory-related sample records without resetting users:
+
+```sh
+npm run db:seed
+```
+
+This script:
+
+- ensures the default admin and test user exist
+- clears existing categories, suppliers, products, and orders
+- creates sample categories
+- creates sample suppliers
+- creates sample products
+- creates sample orders with embedded order items
+- adjusts product stock levels to reflect the seeded orders
+
+Note:
+
+- Order items are stored inside the `Order` document in this codebase, so there is no separate `orderitems` collection to seed
 
 ## Local Development
 

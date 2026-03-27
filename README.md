@@ -81,6 +81,11 @@ node_modules\.bin\vue-cli-service.cmd build
 - `GET /api/products`
 - `GET /api/orders`
 
+## Seed commands
+
+- `npm run db:reset`: drops the current database and seeds the default admin/test users
+- `npm run db:seed`: repopulates categories, suppliers, products, and sample orders
+
 ## Notes
 
 - Keep `.env` out of source control and rotate credentials immediately if they were ever committed.
