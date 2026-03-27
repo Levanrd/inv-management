@@ -34,7 +34,6 @@
             size="large"
             :disabled="loading"
             clearable
-            @keyup.enter.native="login"
           ></el-input>
         </el-form-item>
 
@@ -46,7 +45,6 @@
             size="large"
             :type="showPassword ? 'text' : 'password'"
             :disabled="loading"
-            @keyup.enter.native="login"
           >
             <template slot="suffix">
               <i
