@@ -1,89 +1,152 @@
 import { Router } from "express"
+import { body, param, query } from "express-validator"
 import Order from "../../models/Order.js"
-import OrderItem from "../../models/OrderItem.js"
+import User from "../../models/User.js"
 import authenticateToken from "../../middlewares/authentication.js"
 import authorizeAdmin from "../../middlewares/authorization.js"
+import asyncHandler from "../../utils/asyncHandler.js"
+import HttpError from "../../utils/httpError.js"
+import { applyInventoryAdjustment, calculateOrderTotal, enrichOrderItems } from "../../utils/inventory.js"
+import { buildPagination, handleValidationResult } from "../../utils/validation.js"
 
 const router = Router()
 
-// Create a new order
-router.post('/', authenticateToken, async (req, res) => {
-  try {
-    const { user, order_items, status, total_amount } = req.body
+const orderValidation = [
+  body('user').isMongoId().withMessage('A valid user is required'),
+  body('status').optional().isIn(['pending', 'completed', 'cancelled']).withMessage('Invalid status'),
+  body('order_items').isArray({ min: 1 }).withMessage('At least one order item is required'),
+  body('order_items.*.product').isMongoId().withMessage('Each order item must include a valid product'),
+  body('order_items.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1').toInt(),
+]
 
-    // Check if order items are provided
-    if(!Array.isArray(order_items) || order_items.length === 0) {
-      return res.status(400).json({ error: 'Order items are required' })
+router.post('/', authenticateToken, orderValidation, asyncHandler(async (req, res) => {
+  handleValidationResult(req)
+
+  const canCreateForOtherUsers = req.user.role === 'admin'
+  if (!canCreateForOtherUsers && req.user._id !== req.body.user) {
+    throw new HttpError(403, 'You can only create orders for your own account')
+  }
+
+  const userExists = await User.exists({ _id: req.body.user })
+  if (!userExists) {
+    throw new HttpError(400, 'Selected user does not exist')
+  }
+
+  const orderItems = await enrichOrderItems(req.body.order_items)
+  const total_amount = calculateOrderTotal(orderItems)
+
+  await applyInventoryAdjustment(orderItems, -1)
+
+  const order = await Order.create({
+    user: req.body.user,
+    order_items: orderItems,
+    status: req.body.status || 'pending',
+    total_amount,
+  })
+
+  await order.populate('user', 'user_name first_name last_name email role')
+  await order.populate('order_items.product', 'product_name sku price stock_qty')
+
+  res.status(201).json({ message: 'Order created successfully', order })
+}))
+
+router.get(
+  '/',
+  authenticateToken,
+  [
+    query('status').optional().isIn(['pending', 'completed', 'cancelled']).withMessage('Invalid status'),
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+  ],
+  asyncHandler(async (req, res) => {
+    handleValidationResult(req)
+
+    const { page, limit, skip } = buildPagination(req)
+    const filter = {}
+
+    if (req.user.role !== 'admin') {
+      filter.user = req.user._id
     }
 
-    // Create the Order
-    const order = new Order({ user, status, total_amount })
-    await order.save()
+    if (req.query.status) {
+      filter.status = req.query.status
+    }
 
-    // Validate and save each Order Item
-    const orderItems = await Promise.all(order_items.map(async item => {
-      const orderItem = new OrderItem({ ...item, order: order._id })
-      await orderItem.save()
-      return orderItem._id
-    }))
+    const [orders, total] = await Promise.all([
+      Order.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('user', 'user_name first_name last_name email role')
+        .populate('order_items.product', 'product_name sku price stock_qty'),
+      Order.countDocuments(filter),
+    ])
 
-    // Update the Order with the Order Items
-    order.order_items = orderItems
-    await order.save()
+    res.status(200).json({
+      items: orders,
+      pagination: { page, limit, total },
+    })
+  })
+)
 
-    res.status(201).json({ message: 'Order created successfully', order })
-  } catch (e) {
-    console.error('Error creating order:', e)
-    res.status(400).json({ error: e.message })
+router.get('/:id', authenticateToken, [param('id').isMongoId().withMessage('Invalid order id')], asyncHandler(async (req, res) => {
+  handleValidationResult(req)
+
+  const order = await Order.findById(req.params.id)
+    .populate('user', 'user_name first_name last_name email role')
+    .populate('order_items.product', 'product_name sku price stock_qty')
+
+  if (!order) {
+    throw new HttpError(404, 'Order not found')
   }
-})
 
-// Get all orders
-router.get('/', authenticateToken, async (req, res) => {
-  try {
-    const orders = await Order.find().populate('user').populate('order_items')
-    res.status(200).json(orders)
-  } catch (e) {
-    console.error('Error fetching orders:', e)
-    res.status(400).json({ error: e.message })
+  if (req.user.role !== 'admin' && String(order.user._id) !== req.user._id) {
+    throw new HttpError(403, 'Forbidden to view this order')
   }
-})
 
-// Get order by id (admin only)
-router.get('/:id', authenticateToken, async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id).populate('user').populate('items')
-    if (!order) return res.status(404).json({ error: 'Order not found' })
-    res.status(200).json(order)
-  } catch (e) {
-    console.error('Error fetching order:', e)
-    res.status(500).json({ error: e.message })
-  }
-})
+  res.status(200).json(order)
+}))
 
-// Update order by id (admin only)
-router.put('/:id', authenticateToken, authorizeAdmin, async (req, res) => {
-  try {
-    const { user, order_items, status, total_amount } = req.body
-    const order = await Order.findByIdAndUpdate(req.params.id, { user, order_items, status, total_amount }, { new: true })
-    if (!order) return res.status(404).json({ error: 'Order not found' })
-    res.status(200).json(order)
-  } catch (e) {
-    console.error('Error updating order:', e)
-    res.status(400).json({ error: e.message })
-  }
-})
+router.put('/:id', authenticateToken, authorizeAdmin, [param('id').isMongoId().withMessage('Invalid order id'), body('status').isIn(['pending', 'completed', 'cancelled']).withMessage('Invalid status')], asyncHandler(async (req, res) => {
+  handleValidationResult(req)
 
-// Delete order by id (admin only)
-router.delete('/:id', authenticateToken, authorizeAdmin, async (req, res) => {
-  try {
-    const order = await Order.findByIdAndDelete(req.params.id)
-    if (!order) return res.status(404).json({ error: 'Order not found' })
-    res.status(200).json({ message: 'Order deleted successfully' })
-  } catch (e) {
-    console.error('Error deleting order:', e)
-    res.status(400).json({ error: e.message })
+  const order = await Order.findById(req.params.id)
+  if (!order) {
+    throw new HttpError(404, 'Order not found')
   }
-})
+
+  const previousStatus = order.status
+  order.status = req.body.status
+
+  if (previousStatus !== 'cancelled' && req.body.status === 'cancelled') {
+    await applyInventoryAdjustment(order.order_items, 1)
+  }
+
+  if (previousStatus === 'cancelled' && req.body.status !== 'cancelled') {
+    await applyInventoryAdjustment(order.order_items, -1)
+  }
+
+  await order.save()
+  await order.populate('user', 'user_name first_name last_name email role')
+  await order.populate('order_items.product', 'product_name sku price stock_qty')
+
+  res.status(200).json(order)
+}))
+
+router.delete('/:id', authenticateToken, authorizeAdmin, [param('id').isMongoId().withMessage('Invalid order id')], asyncHandler(async (req, res) => {
+  handleValidationResult(req)
+
+  const order = await Order.findById(req.params.id)
+  if (!order) {
+    throw new HttpError(404, 'Order not found')
+  }
+
+  if (order.status !== 'cancelled') {
+    await applyInventoryAdjustment(order.order_items, 1)
+  }
+
+  await order.deleteOne()
+  res.status(200).json({ message: 'Order deleted successfully' })
+}))
 
 export default router

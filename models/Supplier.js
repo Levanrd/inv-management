@@ -6,7 +6,8 @@ const supplier = new Schema({
     required: [true, "Supplier name is required"],
     unique: true,
     trim: true,
-    maxlength: [50, "Supplier name cannot be more than 50 characters"]
+    maxlength: [50, "Supplier name cannot be more than 50 characters"],
+    index: true
   },
   contact_info: {
     address: {
@@ -27,7 +28,9 @@ const supplier = new Schema({
       required: [true, "Email is required"],
       unique: true,
       trim: true,
-      maxlength: [50, "Email cannot exceed 50 characters"]
+      lowercase: true,
+      maxlength: [50, "Email cannot exceed 50 characters"],
+      match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email address']
     }
   }
 }, { timestamps: true })

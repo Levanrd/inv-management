@@ -1,44 +1,91 @@
 # Inventory Management System
 
-## Overview
-This project consists of a backend and a frontend (client) application. The backend is built with Node.js and Express, while the frontend is built with Vue.js.
+An inventory management application with an Express/MongoDB backend and a Vue 2 frontend for catalog, supplier, order, and user operations.
+
+## Stack
+
+- Backend: Node.js, Express, Mongoose, JWT authentication
+- Frontend: Vue 2, Vue Router, Vuex, Element UI
+- Database: MongoDB
+
+## Features
+
+- Authenticated inventory dashboard with operational overview
+- Product, category, supplier, order, and user management
+- Role-aware access control for admin-only actions
+- Server-side validation, rate limiting, request sanitization, and centralized error handling
+- Inventory-aware order creation with stock adjustment and reporting endpoints
 
 ## Prerequisites
-- Node.js (v14.x or higher)
-- npm (v6.x or higher)
-- MongoDB (v4.x or higher)
 
-## Getting Started
+- Node.js 18+
+- npm 9+
+- MongoDB
 
-### Backend Setup
-  ```sh
-1. **Clone the repository**:
-  git clone https://github.com/lesterivan/inv-management.git
-  cd inv-management
+## Backend setup
 
-2. **Install dependencies**:
-  npm install
+1. Install dependencies:
 
-3. **Create a .env file in the root directory**:
-  touch .env
+```sh
+npm install
+```
 
-  // Add the following environment variables to the .env file:
-  PORT=4000
-  MONGODB_URI=mongodb://localhost:27017/your-database-name # (ask your supervisor)
-  JWT_SECRET=your_jwt_secret # (ask your supervisor)
+2. Create a local environment file from the example:
 
-4. **Run the backend server**:
+```sh
+copy .env.example .env
+```
+
+3. Update `.env` with your MongoDB connection string and a strong `JWT_SECRET`.
+
+4. Start the API:
+
+```sh
 npm run dev
 ```
 
-### Frontend (Client) Setup
+The API runs on `http://localhost:4000` by default.
+
+## Frontend setup
+
+1. Install client dependencies:
+
 ```sh
-1. **Navigate to the client directory**:
-  cd ../client
-
-2. **Install dependencies**:
-  npm install
-
-3. **Run the frontend development server**:
-  npm run dev
+cd client
+npm install
 ```
+
+2. Start the frontend:
+
+```sh
+npm run dev
+```
+
+The Vue app runs on `http://localhost:8080` by default.
+
+## Production build
+
+Build the frontend for deployment:
+
+```sh
+cd client
+node_modules\.bin\vue-cli-service.cmd build
+```
+
+## API highlights
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `GET /api/reports`
+- `GET /api/products`
+- `GET /api/orders`
+
+## Notes
+
+- Keep `.env` out of source control and rotate credentials immediately if they were ever committed.
+- The current production bundle still includes the full Element UI vendor chunk, so bundle-size optimization is a good next step after this hardening pass.
+
+## Documentation
+
+Detailed application documentation is available in [docs/APP_DOCUMENTATION.md](/C:/Users/Lester/Documents/Repositories/inv-management/docs/APP_DOCUMENTATION.md).

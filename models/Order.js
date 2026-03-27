@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose"
+import { orderItemSchema } from "./OrderItem.js"
 
 const order = new Schema({
   user: {
@@ -6,11 +7,13 @@ const order = new Schema({
     ref: "User",
     required: [true, "User reference is required"]
   },
-  order_items: [{
-    type: Schema.Types.ObjectId,
-    ref: "OrderItem",
-    required: [true, "Order items are required"]
-  }],
+  order_items: {
+    type: [orderItemSchema],
+    validate: {
+      validator: (items) => Array.isArray(items) && items.length > 0,
+      message: "Order items are required"
+    }
+  },
   status: {
     type: String,
     enum: ["pending", "completed", "cancelled"],

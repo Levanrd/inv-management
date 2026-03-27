@@ -2,8 +2,25 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
+}
+
+:root {
+  --app-font: "Aptos", "Segoe UI", "Helvetica Neue", sans-serif;
+  --app-text: #213126;
+  --app-muted: #617160;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--app-font);
+  color: var(--app-text);
+  background: #f7f5ef;
+  text-rendering: optimizeLegibility;
 }
 
 h1,
@@ -12,32 +29,49 @@ h3,
 h4,
 h5,
 h6 {
-  font-size: 15px;
+  margin: 0;
+  font-weight: 700;
+}
+
+a,
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+p {
   margin: 0;
 }
 
-.scroll-400 {
-  max-height: 400px;
+.el-button--primary {
+  background-color: #214c35;
+  border-color: #214c35;
 }
 
-.search {
-  display: block;
-  margin-bottom: 5px;
+.el-button--primary:hover,
+.el-button--primary:focus {
+  background-color: #2b6245;
+  border-color: #2b6245;
 }
 
-.el-tabs__header {
-  margin: 0 5px 15px 0 !important; 
+.el-input__inner,
+.el-textarea__inner,
+.el-select .el-input__inner {
+  border-radius: 14px;
 }
 
-.div#pane-products {
-  margin: 5px;
-}
-.el-header {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+.el-dialog {
+  border-radius: 24px;
 }
 
-.el-date-editor {
-  .el-range-separator {
-    padding: 0;
-  }
+.el-table th {
+  color: #51604c;
+  font-weight: 700;
+}
+
+.el-table td,
+.el-table th {
+  background-color: transparent;
 }

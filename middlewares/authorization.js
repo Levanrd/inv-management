@@ -1,8 +1,10 @@
+import HttpError from "../utils/httpError.js"
+
 const authorizeAdmin = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next()
   } else {
-    res.status(403).json({ error: "Forbidden to perform this task" })
+    next(new HttpError(403, "Forbidden to perform this task"))
   }
 }
 

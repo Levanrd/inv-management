@@ -1,7 +1,7 @@
 import Vue from "vue"
 import Router from "vue-router"
 import Login from "../components/login"
-import ProductDetails from "../apps/ims/components/product-details"
+import Register from "../components/register"
 import Ims from "../apps/ims/app.vue"
 import store from "../store"
 
@@ -18,16 +18,15 @@ let routes = [
     component: Login
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: Register
+  },
+  {
     path: '/ims',
     name: 'Ims',
     component: Ims,
     meta: { requiresAuth: true } 
-  },
-  {
-    path: '/ims/products/:id',
-    name: 'ProductDetails',
-    component: ProductDetails,
-    meta: { requiresAuth: true }
   }
 ]
 // .concat(Ims.routes)
@@ -54,11 +53,12 @@ router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     // Check for token and validity
     if (!token || !isTokenValid(token)) {
+      store.dispatch('logout')
       next({ name: "Login" })
     } else {
       next()
     }
-  } else if (to.name === "Login" && token && isTokenValid(token)) {
+  } else if ((to.name === "Login" || to.name === "Register") && token && isTokenValid(token)) {
     next({ name: "Ims" })
   } else {
     next()

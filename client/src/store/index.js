@@ -5,10 +5,10 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    token: null,
-    user_name: null,
-    role: null,
-    isAuthenticated: false
+    token: localStorage.getItem("token"),
+    user_name: localStorage.getItem("user_name"),
+    role: localStorage.getItem("role"),
+    isAuthenticated: Boolean(localStorage.getItem("token"))
   },
 
   mutations: {

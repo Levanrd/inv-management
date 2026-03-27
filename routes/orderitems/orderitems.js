@@ -1,72 +1,48 @@
 import { Router } from "express"
-import OrderItem from "../../models/OrderItem.js"
+import { param } from "express-validator"
+import Order from "../../models/Order.js"
 import authenticateToken from "../../middlewares/authentication.js"
-import authorizeAdmin from "../../middlewares/authorization.js"
+import asyncHandler from "../../utils/asyncHandler.js"
+import HttpError from "../../utils/httpError.js"
+import { handleValidationResult } from "../../utils/validation.js"
 
 const router = Router()
 
-// Add item to an existing order (authenticated users, must own the order or be admin)
-router.post("/:orderId/items", authenticateToken, async (req, res) => {
-  try {
-    const order = await OrderItem.findById(req.params.orderId)
-    if (!order) return res.status(404).json({ error: "Order not found" })
+router.get("/", authenticateToken, asyncHandler(async (req, res) => {
+  const filter = req.user.role === 'admin' ? {} : { user: req.user._id }
+  const orders = await Order.find(filter)
+    .select('order_items user status total_amount createdAt updatedAt')
+    .populate('user', 'user_name email')
+    .populate('order_items.product', 'product_name sku price')
 
-    if (req.user._id !== order.user.toString() && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden to modify this order" })
-    }
+  const items = orders.flatMap((order) =>
+    order.order_items.map((item) => ({
+      ...item.toObject(),
+      orderId: order._id,
+      orderStatus: order.status,
+      orderUser: order.user,
+    }))
+  )
 
-    order.items.push(req.body) // req.body should contain product ID and quantity
-    await order.save()
-    res.status(201).json(order)
-  } catch (error) {
-    console.error("Error adding item:", error)
-    res.status(400).json({ error: error.message })
+  res.status(200).json(items)
+}))
+
+router.get("/:orderId", authenticateToken, [param('orderId').isMongoId().withMessage('Invalid order id')], asyncHandler(async (req, res) => {
+  handleValidationResult(req)
+
+  const order = await Order.findById(req.params.orderId)
+    .populate('user', 'user_name email')
+    .populate('order_items.product', 'product_name sku price')
+
+  if (!order) {
+    throw new HttpError(404, "Order not found")
   }
-})
 
-// Update item in an existing order (authenticated users, must own the order or be admin)
-router.put("/:orderId/items/:itemId", authenticateToken, async (req, res) => {
-  try {
-    const order = await OrderItem.findById(req.params.orderId)
-    if (!order) return res.status(404).json({ error: "Order not found" })
-
-    if (req.user._id !== order.user.toString() && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden to modify this order" })
-    }
-
-    const item = order.items.id(req.params.itemId)
-    if (!item) return res.status(404).json({ error: "Item not found" })
-
-    item.quantity = req.body.quantity || item.quantity
-    item.price = req.body.price || item.price
-    await order.save()
-    res.status(200).json(order)
-  } catch (error) {
-    console.error("Error updating item:", error)
-    res.status(400).json({ error: error.message })
+  if (req.user.role !== 'admin' && String(order.user._id) !== req.user._id) {
+    throw new HttpError(403, 'Forbidden to view this order')
   }
-})
 
-// Delete item from an existing order (authenticated users, must own the order or be admin)
-router.delete("/:orderId/items/:itemId", authenticateToken, async (req, res) => {
-  try {
-    const order = await OrderItem.findById(req.params.orderId)
-    if (!order) return res.status(404).json({ error: "Order not found" })
-
-    if (req.user._id !== order.user.toString() && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden to modify this order" })
-    }
-
-    const item = order.items.id(req.params.itemId)
-    if (!item) return res.status(404).json({ error: "Item not found" })
-
-    item.remove()
-    await order.save()
-    res.status(200).json(order)
-  } catch (error) {
-    console.error("Error deleting item:", error)
-    res.status(400).json({ error: error.message })
-  }
-})
+  res.status(200).json(order.order_items)
+}))
 
 export default router

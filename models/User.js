@@ -7,6 +7,7 @@ const user = new Schema({
     required: [true, 'Username is required'],
     unique: true,
     trim: true,
+    minlength: [3, 'Username must be at least 3 characters long'],
     maxlength: [50, 'Username cannot be more than 50 characters']
   },
   first_name: {
@@ -26,12 +27,15 @@ const user = new Schema({
     required: [true, 'Email is required'],
     unique: true,
     trim: true,
-    maxlength: [50, 'Email cannot be more than 50 characters']
+    lowercase: true,
+    maxlength: [100, 'Email cannot be more than 100 characters'],
+    match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email address']
   },
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [6, 'Password cannot be less than 6 characters']
+    minlength: [8, 'Password must be at least 8 characters long'],
+    select: false // Don't return password by default in queries
   },
   role: {
     type: String,
@@ -46,13 +50,26 @@ const user = new Schema({
   timestamps: true
 })
 
-
 // Hash password before saving
 user.pre('save', async function(next) {
   if(!this.isModified('password')) return next()
 
   const salt = await bcrypt.genSalt(10)
   this.password = await bcrypt.hash(this.password, salt)
+  next()
+})
+
+user.pre('findOneAndUpdate', async function(next) {
+  const update = this.getUpdate()
+
+  if (!update?.password) {
+    next()
+    return
+  }
+
+  const salt = await bcrypt.genSalt(10)
+  update.password = await bcrypt.hash(update.password, salt)
+  this.setUpdate(update)
   next()
 })
 
