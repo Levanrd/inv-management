@@ -10,7 +10,7 @@ An inventory management application with an Express/MongoDB backend and a Vue 2 
 
 ## Features
 
-- Authenticated inventory dashboard with operational overview
+- Authenticated route-based workspace with overview, inventory, fulfillment, and admin areas
 - Product, category, supplier, order, and user management
 - Role-aware access control for admin-only actions
 - Server-side validation, rate limiting, request sanitization, and centralized error handling
@@ -44,7 +44,8 @@ copy .env.example .env
 npm run dev
 ```
 
-The API runs on `http://localhost:4000` by default.
+With the provided `.env.example`, the API runs on `http://localhost:4000`.
+If `PORT` is unset, the server falls back to `http://localhost:5000`.
 
 ## Frontend setup
 
@@ -62,6 +63,7 @@ npm run dev
 ```
 
 The Vue app runs on `http://localhost:8080` by default.
+It targets `http://localhost:4000/api` unless `VUE_APP_API_URL` is set for the client.
 
 ## Production build
 
@@ -69,7 +71,7 @@ Build the frontend for deployment:
 
 ```sh
 cd client
-node_modules\.bin\vue-cli-service.cmd build
+npm run build
 ```
 
 ## API highlights
@@ -93,4 +95,4 @@ node_modules\.bin\vue-cli-service.cmd build
 
 ## Documentation
 
-Detailed application documentation is available in [docs/APP_DOCUMENTATION.md](/C:/Users/Lester/Documents/Repositories/inv-management/docs/APP_DOCUMENTATION.md).
+Detailed application documentation is available in [docs/APP_DOCUMENTATION.md](docs/APP_DOCUMENTATION.md).

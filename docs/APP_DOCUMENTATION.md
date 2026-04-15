@@ -5,7 +5,7 @@
 This project is an inventory management system with:
 
 - An Express + MongoDB API in the repository root
-- A Vue 2 + Element UI frontend in [`client`](/C:/Users/Lester/Documents/Repositories/inv-management/client)
+- A Vue 2 + Element UI frontend in [`client`](../client)
 
 The application supports:
 
@@ -40,26 +40,26 @@ The application supports:
 
 ### Root
 
-- [`server.js`](/C:/Users/Lester/Documents/Repositories/inv-management/server.js): API bootstrap, middleware, health check, and startup
-- [`routes`](/C:/Users/Lester/Documents/Repositories/inv-management/routes): Express route modules
-- [`models`](/C:/Users/Lester/Documents/Repositories/inv-management/models): Mongoose schemas
-- [`middlewares`](/C:/Users/Lester/Documents/Repositories/inv-management/middlewares): auth and error middleware
-- [`utils`](/C:/Users/Lester/Documents/Repositories/inv-management/utils): shared helpers for validation, errors, async handlers, serialization, and inventory logic
-- [`scripts/resetDatabase.js`](/C:/Users/Lester/Documents/Repositories/inv-management/scripts/resetDatabase.js): database reset and seed script
-- [`scripts/seedSampleData.js`](/C:/Users/Lester/Documents/Repositories/inv-management/scripts/seedSampleData.js): sample operational data seeder
+- [`server.js`](../server.js): API bootstrap, middleware, health check, and startup
+- [`routes`](../routes): Express route modules
+- [`models`](../models): Mongoose schemas
+- [`middlewares`](../middlewares): auth and error middleware
+- [`utils`](../utils): shared helpers for validation, errors, async handlers, serialization, and inventory logic
+- [`scripts/resetDatabase.js`](../scripts/resetDatabase.js): database reset and seed script
+- [`scripts/seedSampleData.js`](../scripts/seedSampleData.js): sample operational data seeder
 
 ### Frontend
 
-- [`client/src/apps/ims`](/C:/Users/Lester/Documents/Repositories/inv-management/client/src/apps/ims): main authenticated dashboard
-- [`client/src/components/login`](/C:/Users/Lester/Documents/Repositories/inv-management/client/src/components/login): login screen
-- [`client/src/components/register`](/C:/Users/Lester/Documents/Repositories/inv-management/client/src/components/register): registration screen
-- [`client/src/api/ApiConnector.js`](/C:/Users/Lester/Documents/Repositories/inv-management/client/src/api/ApiConnector.js): Axios client and auth/error interceptors
-- [`client/src/router/index.js`](/C:/Users/Lester/Documents/Repositories/inv-management/client/src/router/index.js): route guards
-- [`client/src/store/index.js`](/C:/Users/Lester/Documents/Repositories/inv-management/client/src/store/index.js): auth state storage
+- [`client/src/apps/ims`](../client/src/apps/ims): main authenticated workspace shell and route pages
+- [`client/src/components/login`](../client/src/components/login): login screen
+- [`client/src/components/register`](../client/src/components/register): registration screen
+- [`client/src/api/ApiConnector.js`](../client/src/api/ApiConnector.js): Axios client and auth/error interceptors
+- [`client/src/router/index.js`](../client/src/router/index.js): Vue Router routes and auth guards
+- [`client/src/store/index.js`](../client/src/store/index.js): auth state storage
 
 ## Environment Variables
 
-Use [.env.example](/C:/Users/Lester/Documents/Repositories/inv-management/.env.example) as the template.
+Use [`.env.example`](../.env.example) as the template for the backend environment.
 
 Required values:
 
@@ -68,11 +68,15 @@ Required values:
 
 Common values:
 
-- `PORT`: backend API port, default `4000`
+- `PORT`: backend API port. The provided `.env.example` sets this to `4000`; if it is unset, the server falls back to `5000`
 - `NODE_ENV`: `development` or `production`
 - `FRONTEND_URL`: allowed frontend origin for production CORS
 - `SEED_ADMIN_PASSWORD`: optional override for admin seed password
 - `SEED_TEST_PASSWORD`: optional override for test-user seed password
+
+Frontend runtime/build value:
+
+- `VUE_APP_API_URL`: optional client API base URL. The frontend defaults to `http://localhost:4000/api`
 
 ## Authentication and Roles
 
@@ -232,32 +236,26 @@ Returns:
 - recent orders
 - order status summary
 
-## Frontend Screens
+## Frontend Routes
 
-### Login
+### Public routes
 
-The login page:
+- `/login`: validates email and password, stores auth state in Vuex and localStorage, and redirects authenticated users into the workspace
+- `/register`: validates password strength, confirms password match, and creates a standard user account
 
-- validates email and password
-- stores auth state in Vuex and localStorage
-- redirects authenticated users into the dashboard
+### Authenticated workspace
 
-### Register
+The main workspace lives under `/ims` and uses sidebar navigation with nested child routes:
 
-The register page:
+- `/ims/overview`: reporting, low-stock monitoring, recent orders, and summary cards
+- `/ims/products`: product search, filtering, and inventory management
+- `/ims/orders`: order creation plus status and fulfillment management
+- `/ims/admin`: admin-only management for users, categories, and suppliers
 
-- validates password strength
-- confirms password match
-- creates a standard user account
+Routing notes:
 
-### Dashboard
-
-The dashboard is divided into tabs:
-
-- `Overview`: reporting, low stock, recent orders
-- `Products`: product search and inventory management
-- `Orders`: order creation and status management
-- `Admin Setup`: category, supplier, and user management for admins
+- `/` redirects to `/login`
+- `/ims` redirects to `/ims/overview`
 
 ## Database Reset and Seed
 
@@ -324,19 +322,21 @@ npm install
 npm run dev
 ```
 
+With the current defaults, the frontend serves on `http://localhost:8080` and targets `http://localhost:4000/api`.
+
 ## Production Build
 
 Build the frontend:
 
 ```sh
 cd client
-node_modules\.bin\vue-cli-service.cmd build
+npm run build
 ```
 
 ## Operational Notes
 
 - The backend exposes a health endpoint at `/health`
-- Errors are centralized through [`middlewares/errorHandler.js`](/C:/Users/Lester/Documents/Repositories/inv-management/middlewares/errorHandler.js)
+- Errors are centralized through [`middlewares/errorHandler.js`](../middlewares/errorHandler.js)
 - Request payloads are sanitized before route handling
 - Auth routes have stricter rate limiting
 - The frontend build currently succeeds, but vendor bundle size is still large due to Element UI
